@@ -32,8 +32,6 @@ class Indicators:
             return int(param)
         except:
             uids_string = re.search('{(.*)}', param).group(1)
-            # operator_index = [pos for pos, char in enumerate(uids_string) if char == '+' or char == '-'
-            # or char == '/' or char == '(' or char == ')']
             uids = uids_string.split('} + #{')
             for uid in uids:
                 request = requests.get(
