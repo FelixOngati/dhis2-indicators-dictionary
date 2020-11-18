@@ -38,6 +38,7 @@ class Indicators:
             uid = result.get('id')
             name = result.get('name')
             last_updated = result.get('lastUpdated')
+            self.add_to_csv([uid, name, numerator, denominator, last_updated])
             translated_inds.append([uid, name, numerator, denominator, last_updated])
         return translated_inds
 
@@ -69,9 +70,9 @@ class Indicators:
             )
         print("File Created")
 
-    def add_to_csv(details):
+    def add_to_csv(self, details):
         ''' add data to the csv file '''
-        with open("data/kenya_ipt_comp_fy20.csv", 'a') as f:
+        with open(self.filename, 'a') as f:
             writer = csv.writer(f)
             writer.writerow(details)
 
