@@ -8,6 +8,18 @@ class Indicators:
     password = os.environ.get('DHIS2_PASS')
     auth = requests.auth.HTTPBasicAuth(username, password)
 
+    def indicator_group_metadata(self,uid):
+        request = requests.get(
+            'https://hiskenya.org/api/indicatorGroups/' + uid + '.json',
+            auth=self.auth
+        )
+        inds = []
+        for indicator in request.json().get('indicators'):
+            inds.append(indicator.get('id'))
+        # self.fetch_indicator(inds)
+        # print(inds)
+        return self.fetch_indicator(inds)
+
     # receives @ind_arr array containing uids
     # @ returns an array list of indicators metadata
     def fetch_indicator(self, ind_arr):
@@ -28,22 +40,26 @@ class Indicators:
         return translated_inds
 
     def translate_formula(self, param):
+        uids_string = param
         try:
+            print(param)
             return int(param)
         except:
-            uids_string = re.search('{(.*)}', param).group(1)
-            uids = uids_string.split('} + #{')
-            for uid in uids:
-                request = requests.get(
-                    'https://hiskenya.org/api/dataElements/' + uid.split('.')[0] + '.json',
-                    auth=self.auth
-                )
-                uids_string = uids_string.replace(uid, request.json().get('name'))
+            for item in param.split():
+                uid = re.findall('{(.*)}', item)
+                if uid:
+                    request = requests.get(
+                        'https://hiskenya.org/api/dataElements/' + uid[0].split('.')[0] + '.json',
+                        auth=self.auth
+                    )
+                    uids_string = uids_string.replace(uid[0], request.json().get('name'))
             uids_string = uids_string.replace('}', '')
             uids_string = uids_string.replace('#{', '')
+            print(uids_string)
             return uids_string
 
 
 if __name__ == '__main__':
     indicators = Indicators()
-    print(indicators.fetch_indicator(['BvOQZuISXdw']))
+    # receives indicator group as uid
+    print(indicators.indicator_group_metadata('LfgaY9O4EP8'))
