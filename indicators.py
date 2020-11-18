@@ -1,14 +1,16 @@
 import os
 import requests
 import re
+import csv
 
 
 class Indicators:
     username = os.environ.get('DHIS2_USER')
     password = os.environ.get('DHIS2_PASS')
     auth = requests.auth.HTTPBasicAuth(username, password)
+    filename = ''
 
-    def indicator_group_metadata(self,uid):
+    def indicator_group_metadata(self, uid):
         request = requests.get(
             'https://hiskenya.org/api/indicatorGroups/' + uid + '.json',
             auth=self.auth
@@ -16,8 +18,8 @@ class Indicators:
         inds = []
         for indicator in request.json().get('indicators'):
             inds.append(indicator.get('id'))
-        # self.fetch_indicator(inds)
-        # print(inds)
+        self.filename = request.json().get('name') + "_indicators.csv"
+        self.create_csv(self.filename)
         return self.fetch_indicator(inds)
 
     # receives @ind_arr array containing uids
@@ -57,6 +59,21 @@ class Indicators:
             uids_string = uids_string.replace('#{', '')
             print(uids_string)
             return uids_string
+
+    def create_csv(self, filename):
+        ''' create a new csv file'''
+        with open(filename, 'w') as f:
+            writer = csv.writer(f)
+            writer.writerow(
+                ['uid', 'name', 'numerator', 'denominator', 'last_updated']
+            )
+        print("File Created")
+
+    def add_to_csv(details):
+        ''' add data to the csv file '''
+        with open("data/kenya_ipt_comp_fy20.csv", 'a') as f:
+            writer = csv.writer(f)
+            writer.writerow(details)
 
 
 if __name__ == '__main__':
